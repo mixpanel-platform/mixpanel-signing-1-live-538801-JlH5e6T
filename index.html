@@ -6,10 +6,75 @@
     <script src="https://cdn.mxpnl.com/libs/mixpanel-platform/build/mixpanel-platform.v0.latest.min.js"></script>
   </head>
   <body class="mixpanel-platform-body">
-    <h1>Hello, World!</h1>
+    <div class="mixpanel-platform-section">
+      <div id="intervalSelect" style="float: left;"></div>
+      <div id="interval" class="mixpanel-platform-label" style="margin-left: 10px;">interval</div>
+      <div id="propSelect" style="float: left;"></div>
+      <div id="dateSelect" style="float: right;"></div>
+      <div style="clear: both;"></div>
+      <div id="graph"></div>
+    </div>
     <script>
       MP.api.ready(function() {
-        // Run queries and display results here
+        var dateSelect  = $('#dateSelect').MPDatepicker();
+        var eventGraph  = $('#graph').MPChart({chartType: 'line'});
+        
+        var options = {
+          items: [
+            {label: '-- Select interval length in days --', value: 0},
+            {label: '1', value: 1},
+            {label: '7', value: 7},
+            {label: '30', value: 30}
+          ]
+        };
+        
+        var intervalPicker = $('#intervalSelect').MPSelect(options);
+        
+        var eventsNum = 2;
+        
+        var params = {
+          from: moment().subtract(1, 'months'),
+          to: moment(),
+          limit: 200,                             // maximum number of results to return
+          length: 1                             // number of days each user has to complete the funnel
+          //where: 'properties["age"] == 21',       // an expression to filter by.
+          //segment: '$browser'                     // a segmentation expression or event property.
+        };
+
+        var runQuery = function() {
+          //var eventName = eventSelect.MPEventSelect('value'),
+          //    propName  = propSelect.MPPropertySelect('value'),
+          var dateRange = dateSelect.MPDatepicker('value'),
+              interval = intervalPicker.MPSelect('value');
+          
+          params['from'] = dateRange.from.toISOString().substring(0, 10);
+          params['to'] = dateRange.to.toISOString().substring(0, 10);
+          params['length'] = interval;
+          funnelResults = {};
+          
+          if(intervalSelect){
+            MP.api.funnel("Start", "Completed", params).done(function(results) {
+              console.log(results);
+              processResults(results, funnelResults, params['from']);
+              //eventTable.MPTable('setData', results);
+            });
+          }
+        };
+        
+        var processResults = function(results, newResults, from) {
+          var dates = Object.keys(results[0]);
+          for(j=0; j<dates.length; j++) {
+            //newResults[dates[j]] = 0;
+            newResults[dates[j]] = (results[eventsNum-1][dates[j]]['count'] / results[0][dates[j]]['count']) * 100;
+          }
+          finalResults = {};
+          finalResults['Conversions'] = newResults;
+          console.log(newResults);
+          eventGraph.MPChart('setData', finalResults);
+        };
+        
+        intervalPicker.on('change', runQuery);
+        dateSelect.on('change', runQuery);
       });
     </script>
   </body>
