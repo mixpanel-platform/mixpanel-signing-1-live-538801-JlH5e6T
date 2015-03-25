@@ -61,6 +61,7 @@
         var processResults = function(results, newResults, from) {
           var dates = Object.keys(results[0]);
           for(j=0; j<dates.length; j++) {
+            debugger
             //newResults[dates[j]] = 0;
             console.log(results[eventsNum-1])
             newResults[dates[j]] = (results[eventsNum-1][dates[j]]['count'] / results[0][dates[j]]['count']) * 100;
