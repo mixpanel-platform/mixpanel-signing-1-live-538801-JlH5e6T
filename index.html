@@ -8,7 +8,6 @@
   <body class="mixpanel-platform-body">
     <div class="mixpanel-platform-section">
       <div id="intervalSelect" style="float: left;"></div>
-      <div id="interval" class="mixpanel-platform-label" style="margin-left: 10px;">interval</div>
       <div id="propSelect" style="float: left;"></div>
       <div id="dateSelect" style="float: right;"></div>
       <div style="clear: both;"></div>
@@ -53,7 +52,7 @@
           funnelResults = {};
           
           if(intervalSelect){
-            MP.api.funnel("Start", "Completed", params).done(function(results) {
+            MP.api.funnel("Start", "Exit Action", "Completed", params).done(function(results) {
               console.log(results);
               processResults(results, funnelResults, params['from']);
               //eventTable.MPTable('setData', results);
